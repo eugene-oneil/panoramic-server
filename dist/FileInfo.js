@@ -32,6 +32,7 @@ const ffprobe = ffmpeg.ffprobe;
 dotenv.config();
 class FileInfo {
     constructor(filepath, stats, data = undefined) {
+        this.mtype = "file";
         this.filepath = filepath;
         this.name = path.basename(filepath);
         this.directory = path.dirname(filepath);

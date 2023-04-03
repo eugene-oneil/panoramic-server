@@ -37,15 +37,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const WebSocket = __importStar(require("ws"));
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const FileInfo_1 = require("./FileInfo");
+const http = __importStar(require("http"));
+const ClientSocket_1 = require("./ClientSocket");
 const app = (0, express_1.default)();
 const port = process.env.PORT;
 app.get("/", (req, res) => {
     res.send("Hello World!");
 });
 app.get("/list", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("got list request");
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
     res.write("[");
@@ -71,12 +75,18 @@ app.get("/list", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 }));
 // Add a list of allowed origins.
 // If you have more origins you would like to add, you can add them to the array below.
-const allowedOrigins = ['http://localhost:4200'];
+const allowedOrigins = ["http://localhost:4200"];
 const options = {
-    origin: allowedOrigins
+    origin: allowedOrigins,
 };
 app.use((0, cors_1.default)(options));
 app.use(express_1.default.json());
-app.listen(port, () => {
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+wss.on("connection", (client) => {
+    new ClientSocket_1.ClientSocket(client).upload_directory("F:Videos");
+});
+//start our server
+server.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}/list?dir=P:\\Downloads`);
 });
